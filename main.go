@@ -145,19 +145,27 @@ func tokenProxyHandler(tokenEndpoint, repoPrefix string) http.HandlerFunc {
 		FlushInterval: -1,
 		Director: func(r *http.Request) {
 			orig := r.URL.String()
+                        log.Printf("In this function")
 
 			q := r.URL.Query()
 			scope := q.Get("scope")
-			if scope == "" {
-				return
+                        log.Printf("This is repoPrefix: %s", repoPrefix)
+                        log.Printf("In return function")
+                        if ( scope == ""){
+                        scope = "repository:te-runner"
 			}
-			newScope := strings.Replace(scope, "repository:", fmt.Sprintf("repository:%s/", repoPrefix), 1)
-			q.Set("scope", newScope)
+                        newScope := strings.Replace(scope, "repository:", fmt.Sprintf("repository:%s/", repoPrefix), 1)
+			q.Set("scope", newScope) 
+                        log.Printf("this is the scope: %s", scope)
 			u, _ := url.Parse(tokenEndpoint)
 			u.RawQuery = q.Encode()
 			r.URL = u
+                        log.Printf("token before set scheme: %s", r.URL.Scheme)
+                        r.URL.Scheme = "https"
+                        log.Printf("token after set scheme: %s", r.URL.Scheme)
 			log.Printf("tokenProxyHandler: rewrote url:%s into:%s", orig, r.URL)
 			r.Host = u.Host
+                        log.Printf("\ntoken host: %s\n", r.Host)
 		},
 	}).ServeHTTP
 }
@@ -216,6 +224,7 @@ func (rrt *registryRoundtripper) RoundTrip(req *http.Request) (*http.Response, e
 	}
 
 	resp, err := http.DefaultTransport.RoundTrip(req)
+          log.Printf("Response:\n%+v", resp)
 	if err == nil {
 		log.Printf("request completed (status=%d) url=%s", resp.StatusCode, req.URL)
 	} else {
