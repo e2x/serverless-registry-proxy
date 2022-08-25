@@ -8,15 +8,15 @@ on:
 
 jobs:
     publish:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        image: [gcr-proxy]
-    defaults:
-      run:
-        working-directory: .
-    name: publish
-    steps:
+      runs-on: ubuntu-latest
+      strategy:
+        matrix:
+         image: [gcr-proxy]
+      defaults:
+       run:
+         working-directory: .
+      name: publish
+      steps:
       - uses: actions/checkout@v3
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
@@ -34,7 +34,7 @@ jobs:
 
       - name: Docker build ${{ matrix.image }}
         run: docker build . -t ${{ matrix. image }}:latest
-   
+
       - name: Docker push ${{ matrix.image }} with all tags
         run: |
           docker tag ${{ matrix.image }} europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/${{ matrix.image }}
