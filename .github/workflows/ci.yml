@@ -1,26 +1,42 @@
 name: CI
 
 on:
-  pull_request:
+  workflow_dispatch:
   push:
     branches:
       - master
 
 jobs:
-  golangci:
-    name: lint
+    publish:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: [gcr-proxy]
+    defaults:
+      run:
+        working-directory: .
+    name: publish
     steps:
       - uses: actions/checkout@v3
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          token_format: 'access_token'
+          credentials_json: ${{ secrets.TE_RUNNER_WRITER_ACCESS_TOKEN }}
 
-  docker:
-    name: docker
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+      - name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          registry: europe-west2-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
 
-      - name: Build the docker image
+      - name: Docker build ${{ matrix.image }}
+        run: docker build . -t ${{ matrix. image }}:latest
+   
+      - name: Docker push ${{ matrix.image }} with all tags
         run: |
-            docker build -t testing/serverless-registry-proxy .
+          docker tag ${{ matrix.image }} europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/${{ matrix.image }}
+          docker tag ${{ matrix.image }} europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/${{ matrix.image }}:$(date +%Y%m%d)-${{github.run_number}}
+          docker push --all-tags europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/${{ matrix.image }}
