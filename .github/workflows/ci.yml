@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - master
+    - proxy
   workflow_dispatch:
     branches:
     - proxy
