@@ -1,10 +1,13 @@
 name: CI
 
 on:
-  workflow_dispatch:
   push:
     branches:
-      - master
+    - master
+  workflow_dispatch:
+    branches:
+    - master
+    - proxy
 
 jobs:
     publish:
