@@ -1,0 +1,28 @@
+---
+name: Docker Verify
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '*'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    name: hadolint
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hadolint/hadolint-action@v2.0.0
+        with:
+          dockerfile: Dockerfile
+          config: hadolint.yml
+      - name: Run Trivy vulnerability scanner on image
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'Dockerfile'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
