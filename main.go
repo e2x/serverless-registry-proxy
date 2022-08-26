@@ -152,7 +152,7 @@ func tokenProxyHandler(tokenEndpoint, repoPrefix string) http.HandlerFunc {
                         log.Printf("This is repoPrefix: %s", repoPrefix)
                         repos := strings.Split(repoPrefix, "/")
                         if ( scope == ""){
-                          scope = "repository:" + repos[1]
+                           scope = "repository:" + repos[1] + "/" + repos[1] + ":pull"
 			}
                         newScope := strings.Replace(scope, "repository:", fmt.Sprintf("repository:%s/", repoPrefix), 1)
 			q.Set("scope", newScope) 
