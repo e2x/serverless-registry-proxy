@@ -1,8 +1,5 @@
 ignored:
-  - DL4001
-  - DL3008
-  - SC1091
-  - SC2016
-  - DL3018
-  - DL3006
-  - DL3018
+  - DL4001 #Either use Wget or Curl but not both
+  - DL3008 #Pin versions in apt-get install
+  - DL3006 #DL3006 warning: Always tag the version of an image explicitly
+  - DL3018 #DL3018 warning: Pin versions in apk add. Instead of `apk add <package>` use `apk add <package>=<version>`

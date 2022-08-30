@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    https://www.apache.org/licenses/LICENSE-2.0
+	https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,8 +34,8 @@ const (
 )
 
 var (
-	re                 = regexp.MustCompile(`^/v2/`)
-	realm              = regexp.MustCompile(`realm="(.*?)"`)
+	re    = regexp.MustCompile(`^/v2/`)
+	realm = regexp.MustCompile(`realm="(.*?)"`)
 )
 
 type myContextKey string
@@ -144,28 +144,26 @@ func tokenProxyHandler(tokenEndpoint, repoPrefix string) http.HandlerFunc {
 	return (&httputil.ReverseProxy{
 		FlushInterval: -1,
 		Director: func(r *http.Request) {
-			orig := r.URL.String()
-                        log.Printf("In this function")
+			//	orig := r.URL.String()
 
 			q := r.URL.Query()
 			scope := q.Get("scope")
-                        log.Printf("This is repoPrefix: %s", repoPrefix)
-                        repos := strings.Split(repoPrefix, "/")
-                        if ( scope == ""){
-                           scope = "repository:" + repos[1] + "/" + repos[1] + ":pull"
+			log.Printf("This is repoPrefix: %s", repoPrefix)
+			repos := strings.Split(repoPrefix, "/")
+			if scope == "" {
+				scope = fmt.Sprintf("repository:%s/%s:pull", repos[1], repos[1])
+				log.Printf("Setting missing scope to: %s", scope)
 			}
-                        newScope := strings.Replace(scope, "repository:", fmt.Sprintf("repository:%s/", repoPrefix), 1)
-			q.Set("scope", newScope) 
-                        log.Printf("this is the scope: %s", scope)
+			newScope := strings.Replace(scope, "repository:", fmt.Sprintf("repository:%s/", repoPrefix), 1)
+			q.Set("scope", newScope)
 			u, _ := url.Parse(tokenEndpoint)
 			u.RawQuery = q.Encode()
 			r.URL = u
-                        log.Printf("token before set scheme: %s", r.URL.Scheme)
-                        r.URL.Scheme = "https"
-                        log.Printf("token after set scheme: %s", r.URL.Scheme)
-			log.Printf("tokenProxyHandler: rewrote url:%s into:%s", orig, r.URL)
+			log.Printf("token before set scheme: %s", r.URL.Scheme)
+			//                        r.URL.Scheme = "https"
+			log.Printf("token after set scheme: %s", r.URL.Scheme)
 			r.Host = u.Host
-                        log.Printf("\ntoken host: %s\n", r.Host)
+			log.Printf("\ntoken host: %s\n", r.Host)
 		},
 	}).ServeHTTP
 }
@@ -224,7 +222,6 @@ func (rrt *registryRoundtripper) RoundTrip(req *http.Request) (*http.Response, e
 	}
 
 	resp, err := http.DefaultTransport.RoundTrip(req)
-          log.Printf("Response:\n%+v", resp)
 	if err == nil {
 		log.Printf("request completed (status=%d) url=%s", resp.StatusCode, req.URL)
 	} else {
@@ -244,7 +241,9 @@ func (rrt *registryRoundtripper) RoundTrip(req *http.Request) (*http.Response, e
 }
 
 // updateTokenEndpoint modifies the response header like:
-//    Www-Authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
+//
+//	Www-Authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
+//
 // to point to the https://host/token endpoint to force using local token
 // endpoint proxy.
 func updateTokenEndpoint(resp *http.Response, host string) {

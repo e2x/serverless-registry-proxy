@@ -4,18 +4,12 @@ on:
   push:
     branches:
     - master
-    - proxy
   workflow_dispatch:
     branches:
-    - proxy
-    - master
 
 jobs:
     publish:
       runs-on: ubuntu-latest
-      strategy:
-        matrix:
-         image: [gcr-proxy]
       defaults:
        run:
          working-directory: .
@@ -36,11 +30,11 @@ jobs:
           username: oauth2accesstoken
           password: ${{ steps.auth.outputs.access_token }}
 
-      - name: Docker build ${{ matrix.image }}
-        run: docker build . -t ${{ matrix. image }}:latest
+      - name: Docker build gcr-proxy
+        run: docker build . -t gcr-proxy:latest
 
-      - name: Docker push ${{ matrix.image }} with all tags
+      - name: Docker push gcr-proxy with all tags
         run: |
-          docker tag ${{ matrix.image }} europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/${{ matrix.image }}
-          docker tag ${{ matrix.image }} europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/${{ matrix.image }}:$(date +%Y%m%d)-${{github.run_number}}
-          docker push --all-tags europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/${{ matrix.image }}
+          docker tag gcr-proxy europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/gcr-proxy
+          docker tag gcr-proxy europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/gcr-proxy:$(date +%Y%m%d)-${{github.run_number}}
+          docker push --all-tags europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/gcr-proxy
