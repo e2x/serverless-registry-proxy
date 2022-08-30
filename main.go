@@ -237,7 +237,6 @@ func (rrt *registryRoundtripper) RoundTrip(req *http.Request) (*http.Response, e
 }
 
 // updateTokenEndpoint modifies the response header like:
-//
 // Www-Authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
 //
 // to point to the https://host/token endpoint to force using local token
