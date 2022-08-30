@@ -1,0 +1,3 @@
+DS002
+# Adding this as the misconfiguration ID to be ignore as azure-node image has root user running inside the container and We are running as root becaise Azure only works with root user 
+

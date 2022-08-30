@@ -1,26 +1,36 @@
+---
 name: CI
 
 on:
-  pull_request:
   push:
     branches:
       - master
 
 jobs:
-  golangci:
-    name: lint
+  publish:
     runs-on: ubuntu-latest
+    name: publish
     steps:
       - uses: actions/checkout@v3
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          token_format: 'access_token'
+          credentials_json: ${{ secrets.TE_RUNNER_WRITER_ACCESS_TOKEN }}
 
-  docker:
-    name: docker
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+      - name: Docker Login
+        uses: docker/login-action@v2
+        with:
+          registry: europe-west2-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
 
-      - name: Build the docker image
+      - name: Docker build gcr-proxy
+        run: docker build . -t gcr-proxy:latest
+
+      - name: Docker push gcr-proxy with all tags
         run: |
-            docker build -t testing/serverless-registry-proxy .
+          docker tag gcr-proxy europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/gcr-proxy
+          docker tag gcr-proxy europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/gcr-proxy:$(date +%Y%m%d)-${{github.run_number}}
+          docker push --all-tags europe-west2-docker.pkg.dev/qa-container-repo-567126/gcloud-proxy/gcr-proxy
