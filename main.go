@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-	https://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -144,11 +144,10 @@ func tokenProxyHandler(tokenEndpoint, repoPrefix string) http.HandlerFunc {
 	return (&httputil.ReverseProxy{
 		FlushInterval: -1,
 		Director: func(r *http.Request) {
-			//	orig := r.URL.String()
+			orig := r.URL.String()
 
 			q := r.URL.Query()
 			scope := q.Get("scope")
-			log.Printf("This is repoPrefix: %s", repoPrefix)
 			repos := strings.Split(repoPrefix, "/")
 			if scope == "" {
 				scope = fmt.Sprintf("repository:%s/%s:pull", repos[1], repos[1])
@@ -159,11 +158,8 @@ func tokenProxyHandler(tokenEndpoint, repoPrefix string) http.HandlerFunc {
 			u, _ := url.Parse(tokenEndpoint)
 			u.RawQuery = q.Encode()
 			r.URL = u
-			log.Printf("token before set scheme: %s", r.URL.Scheme)
-			//                        r.URL.Scheme = "https"
-			log.Printf("token after set scheme: %s", r.URL.Scheme)
+			log.Printf("tokenProxyHandler: rewrote url:%s into:%s", orig, r.URL)
 			r.Host = u.Host
-			log.Printf("\ntoken host: %s\n", r.Host)
 		},
 	}).ServeHTTP
 }
@@ -242,7 +238,7 @@ func (rrt *registryRoundtripper) RoundTrip(req *http.Request) (*http.Response, e
 
 // updateTokenEndpoint modifies the response header like:
 //
-//	Www-Authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
+// Www-Authenticate: Bearer realm="https://auth.docker.io/token",service="registry.docker.io"
 //
 // to point to the https://host/token endpoint to force using local token
 // endpoint proxy.
