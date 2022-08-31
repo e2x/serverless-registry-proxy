@@ -150,7 +150,7 @@ func tokenProxyHandler(tokenEndpoint, repoPrefix string) http.HandlerFunc {
 			scope := q.Get("scope")
 			repos := strings.Split(repoPrefix, "/")
 			if scope == "" {
-				scope = fmt.Sprintf("repository:%s/%s:pull", repos[1], repos[1])
+				scope = fmt.Sprintf("repository:%[1]v/%[1]v:pull", repos[1])
 				log.Printf("Setting missing scope to: %s", scope)
 			}
 			newScope := strings.Replace(scope, "repository:", fmt.Sprintf("repository:%s/", repoPrefix), 1)
